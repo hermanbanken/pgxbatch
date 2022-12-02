@@ -14,6 +14,8 @@ INSERT INTO pets (name, species) VALUES ('Tom', 'Cat') RETURNING id;
 ## Naive implementation
 If those queries are written like below, the inserts happen one by one, each taking one roundtrip.
 
+![](./docs/1.naive.png)
+
 ```go
 var q *pgx.Pool
 var row pgx.Row
@@ -37,9 +39,11 @@ if err = row.Scan(&id); err == nil {
 }
 ```
 
-## pgx.Batch implementation
+## Standard pgx.Batch implementation
 While this is fast if the database is near, it is not if the database is globally distributed.
 With pgx.Batch this can be rewritten to below code. This is not easily separable into a repository pattern.
+
+![](./docs/2.pgx.batch.png)
 
 ```go
 b := &pgx.Batch{}
@@ -57,7 +61,10 @@ err = results.QueryRow().Scan(&ids[1])
 err = results.QueryRow().Scan(&ids[2])
 ```
 
+## This libraries pgxbatch.Batch implementation
 With pgxbatch, this can be rewritten to:
+
+![](./docs/3.pgxbatch.png)
 
 ```go
 b := &pgxbatch.Batch{}
